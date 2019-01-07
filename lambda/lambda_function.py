@@ -65,7 +65,7 @@ def help_intent_handler(handler_input):
 def cancel_and_stop_intent_handler(handler_input):
     """Single handler for Cancel and Stop Intent."""
     # type: (HandlerInput) -> Response
-    speech_text = "Thanks for playing! Check us out online at Switch Game or Not dot Com"
+    speech_text = "Thanks for playing! Check us out online at Switch Game or Not dot Com and be sure to check out the Kagg Cast!"
 
     handler_input.response_builder.speak(
         speech_text).set_should_end_session(True)
@@ -122,8 +122,8 @@ def yes_handler(handler_input):
     session_attr['correct_answer'] = correct_answer
 
     speech_text = (
-            "Here are two games. First game: " + games[0]['game'] + ". "
-            "Second game: " + games[1]['game'] + ". "
+            "Here are two games. First game: <break time='1s'/>" + games[0]['game'] + ". <break time='1s'/>"
+            "Second game: <break time='1s'/>" + games[1]['game'] + ". <break time='1s'/>"
             "Say 1 if you think the first game is fake, "
             "2 if you think the second game is fake, "
             "3 if you think they're both fake or "
@@ -149,7 +149,7 @@ def no_handler(handler_input):
     handler_input.attributes_manager.persistent_attributes = session_attr
     handler_input.attributes_manager.save_persistent_attributes()
 
-    speech_text = "Ok. Check us out online at Switch Game or Not dot com"
+    speech_text = "Ok. Check us out online at Switch Game or Not dot com and be sure to check out the Kagg Cast!"
 
     handler_input.response_builder.speak(speech_text)
     return handler_input.response_builder.response
@@ -214,9 +214,9 @@ def number_guess_handler(handler_input):
     elif guess_num != target_num:
         speech_text = random.choice(wrong_buzz)
         if target_num < 3:
-            speech_text += ' Actually, {} is the only fake game.'.format(games[target_num - 1]['game'])
+            speech_text += ' Actually, <break time="1s"/> {} <break time="1s"/> is the only fake game.'.format(games[target_num - 1]['game'])
         elif target_num == 3:
-            speech_text += ' Can you believe both {} and {} are fake?'.format(games[0]['game'], games[1]['game'])
+            speech_text += ' Can you believe both <break time="1s"/> {} <break time="1s"/> and <break time="1s"/> {} <break time="1s"/> are fake?'.format(games[0]['game'], games[1]['game'])
         else:
             speech_text += ' Switch game names are so crazy, even two real games sound fake.'
         speech_text += " Your score is {}. Would you like to play a new game?".format(session_attr['score'])
@@ -226,13 +226,13 @@ def number_guess_handler(handler_input):
         session_attr['score'] += 1
         speech_text = random.choice(right_buzz)
         if target_num < 3:
-            speech_text += ' {} was the fake game. Your score is {}'.format(games[target_num - 1]['game'],
+            speech_text += ' <break time="1s"/> {} <break time="1s"/> was the fake game. Your score is {}'.format(games[target_num - 1]['game'],
                                                                             session_attr['score'])
         elif target_num == 3:
-            speech_text = ' Both {} and {} are fake games. Your score is {}'.format(games[0]['game'], games[1]['game'],
+            speech_text += ' Both <break time="1s"/> {} <break time="1s"/> and <break time="1s"/> {} <break time="1s"/> are fake games. Your score is {}'.format(games[0]['game'], games[1]['game'],
                                                                                     session_attr['score'])
         else:
-            speech_text = ' Both {} and {} are real games. Your score is {}'.format(games[0]['game'], games[1]['game'],
+            speech_text += ' Both <break time="1s"/> {} <break time="1s"/> and <break time="1s"/> {} <break time="1s"/> are real games. Your score is {}'.format(games[0]['game'], games[1]['game'],
                                                                                     session_attr['score'])
         speech_text += " Would you like to play a new game?"
         _ = requests.post(url = 'http://switchgameornot.com/api/alexa/', data = game1)
