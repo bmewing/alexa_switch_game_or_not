@@ -36,8 +36,8 @@ def launch_request_handler(handler_input):
     handler_input.attributes_manager.session_attributes = attr
 
     speech_text = (
-        "Welcome to Switch Game or Not. You have played {} times. "
-        "Would you like to play?".format(attr["games_played"]))
+        "Welcome to Switch Game or Not. If you need a reminder of how to play, just say 'help'. "
+        "Are you ready to play?".format(attr["games_played"]))
     reprompt = "Say yes to start the game or no to quit."
 
     handler_input.response_builder.speak(speech_text).ask(reprompt)
@@ -49,9 +49,13 @@ def help_intent_handler(handler_input):
     """Handler for Help Intent."""
     # type: (HandlerInput) -> Response
     speech_text = (
-        "I've give you two names which may or may not be real games released "
-        "for the Nintendo Switch. You need to guess which is fake, or, guess "
-        "that neither is fake or both are fake.")
+        "I've given you two names which may or may not be real games released "
+        "for the Nintendo Switch. "
+        "Say 1 if you think the first game is fake, "
+        "2 if you think the second game is fake, "
+        "3 if you think they're both fake or "
+        "4 if you think neither is fake."
+    )
     reprompt = "Pick a response, 1, 2, 3 or 4."
 
     handler_input.response_builder.speak(speech_text).ask(reprompt)
@@ -65,7 +69,7 @@ def help_intent_handler(handler_input):
 def cancel_and_stop_intent_handler(handler_input):
     """Single handler for Cancel and Stop Intent."""
     # type: (HandlerInput) -> Response
-    speech_text = "Thanks for playing! Check us out online at Switch Game or Not dot Com and be sure to check out the Kagg Cast!"
+    speech_text = "Thanks for playing! Check us out online at Switch Game or Not dot Com!"
 
     handler_input.response_builder.speak(
         speech_text).set_should_end_session(True)
@@ -116,18 +120,22 @@ def yes_handler(handler_input):
     elif real_games[0] == 0 and real_games[1] == 0:
         correct_answer = 3
 
-    session_attr = handler_input.attributes_manager.session_attributes
+    session_attr = handler_input.attributes_manager.session_attributes    
     session_attr['game_state'] = "STARTED"
     session_attr['games'] = games
     session_attr['correct_answer'] = correct_answer
 
     speech_text = (
-            "Here are two games. First game: <break time='1s'/>" + games[0]['game'] + ". <break time='1s'/>"
-            "Second game: <break time='1s'/>" + games[1]['game'] + ". <break time='1s'/>"
-            "Say 1 if you think the first game is fake, "
+            "Here are two games. First game: <break time='500ms'/>" + games[0]['game'] + ". <break time='500ms'/>"
+            "Second game: <break time='500ms'/>" + games[1]['game'] + ". <break time='500ms'/>"
+            )
+    
+    if session_attr['games_played'] == 0:
+        speech_text += (" Say 1 if you think the first game is fake, "
             "2 if you think the second game is fake, "
             "3 if you think they're both fake or "
-            "4 if you think neither is fake.")
+            "4 if you think neither is fake. ")
+    
     reprompt = "First game: " + games[0]['game'] + ". Second game: " + games[1]['game']
 
     handler_input.response_builder.speak(speech_text).ask(reprompt)
@@ -149,9 +157,32 @@ def no_handler(handler_input):
     handler_input.attributes_manager.persistent_attributes = session_attr
     handler_input.attributes_manager.save_persistent_attributes()
 
-    speech_text = "Ok. Check us out online at Switch Game or Not dot com and be sure to check out the Kagg Cast!"
+    speech_text = "Ok. Check us out online at Switch Game or Not dot com!"
 
     handler_input.response_builder.speak(speech_text)
+    return handler_input.response_builder.response
+
+
+@sb.request_handler(can_handle_func=lambda input:
+currently_playing(input) and
+is_intent_name("RepeatGameIntent")(input))
+def repeat_request_handler(handler_input):
+    """Handler for Repeating game names."""
+    # type: (HandlerInput) -> Response
+    session_attr = handler_input.attributes_manager.session_attributes
+    games = session_attr['games']
+    try:
+        val = int(handler_input.request_envelope.request.intent.slots["GameOrder"].value)
+        if val == 1:
+            speech_text = "First game: <break time='500ms'/>{game1}"
+        else:
+            speech_text = "Second game: <break time='500ms'/>{game2}"
+    except:
+        speech_text = "First game: <break time='500ms'/>{game1}<break time='500ms'/>. Second Game: <break time='500ms'/>{game2}<break time='500ms'/>."
+    speech_text = speech_text.format(game1 = games[0]['game'],
+                                     game2 = games[1]['game'])
+    reprompt = speech_text
+    handler_input.response_builder.speak(speech_text).ask(reprompt)
     return handler_input.response_builder.response
 
 
@@ -193,9 +224,6 @@ def number_guess_handler(handler_input):
         "user_id": uuid,
         "correct": correct2
     }
-    print("DATA TO POST:")
-    print(game1)
-    print(game2)
 
     wrong_buzz = ['Oh, Snap!', 'Gotcha!', 'BUZZ!', 'Nailed it! Just kidding, you blew it.',
                   'Nope!', 'Tricked you!', 'No way!']
@@ -205,8 +233,8 @@ def number_guess_handler(handler_input):
     if guess_num > 4 or guess_num < 1:
         speech_text = (
                 "Sorry, I didn't get that."
-                "First game: " + games[0]['game'] + ". "
-                "Second game: " + games[1]['game'] + ". "
+                "First game: <break time='500ms'/>" + games[0]['game'] + "<break time='500ms'/>. "
+                "Second game: <break time='500ms'/>" + games[1]['game'] + "<break time='500ms'/>. "
                 "Say 1 if you think the first game is fake, "
                 "2 if you think the second game is fake, "
                 "3 if you think they're both fake or "
@@ -214,9 +242,9 @@ def number_guess_handler(handler_input):
     elif guess_num != target_num:
         speech_text = random.choice(wrong_buzz)
         if target_num < 3:
-            speech_text += ' Actually, <break time="1s"/> {} <break time="1s"/> is the only fake game.'.format(games[target_num - 1]['game'])
+            speech_text += ' Actually, <break time="500ms"/> {} <break time="500ms"/> is the only fake game.'.format(games[target_num - 1]['game'])
         elif target_num == 3:
-            speech_text += ' Can you believe both <break time="1s"/> {} <break time="1s"/> and <break time="1s"/> {} <break time="1s"/> are fake?'.format(games[0]['game'], games[1]['game'])
+            speech_text += ' Can you believe both <break time="500ms"/> {} <break time="500ms"/> and <break time="500ms"/> {} <break time="500ms"/> are fake?'.format(games[0]['game'], games[1]['game'])
         else:
             speech_text += ' Switch game names are so crazy, even two real games sound fake.'
         speech_text += " Your score is {}. Would you like to play a new game?".format(session_attr['score'])
@@ -226,13 +254,13 @@ def number_guess_handler(handler_input):
         session_attr['score'] += 1
         speech_text = random.choice(right_buzz)
         if target_num < 3:
-            speech_text += ' <break time="1s"/> {} <break time="1s"/> was the fake game. Your score is {}'.format(games[target_num - 1]['game'],
+            speech_text += ' <break time="500ms"/> {} <break time="500ms"/> was the fake game. Your score is {}'.format(games[target_num - 1]['game'],
                                                                             session_attr['score'])
         elif target_num == 3:
-            speech_text += ' Both <break time="1s"/> {} <break time="1s"/> and <break time="1s"/> {} <break time="1s"/> are fake games. Your score is {}'.format(games[0]['game'], games[1]['game'],
+            speech_text += ' Both <break time="500ms"/> {} <break time="500ms"/> and <break time="500ms"/> {} <break time="500ms"/> are fake games. Your score is {}'.format(games[0]['game'], games[1]['game'],
                                                                                     session_attr['score'])
         else:
-            speech_text += ' Both <break time="1s"/> {} <break time="1s"/> and <break time="1s"/> {} <break time="1s"/> are real games. Your score is {}'.format(games[0]['game'], games[1]['game'],
+            speech_text += ' Both <break time="500ms"/> {} <break time="500ms"/> and <break time="500ms"/> {} <break time="500ms"/> are real games. Your score is {}'.format(games[0]['game'], games[1]['game'],
                                                                                     session_attr['score'])
         speech_text += " Would you like to play a new game?"
         _ = requests.post(url = 'http://switchgameornot.com/api/alexa/', data = game1)

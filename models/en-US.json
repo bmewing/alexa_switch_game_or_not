@@ -41,6 +41,33 @@
                         "how about {number}",
                         "could be {number}"
                     ]
+                },
+                {
+                    "name": "AMAZON.NavigateHomeIntent",
+                    "samples": []
+                },
+                {
+                    "name": "RepeatGameIntent",
+                    "slots": [
+                        {
+                            "name": "GameOrder",
+                            "type": "AMAZON.Ordinal"
+                        }
+                    ],
+                    "samples": [
+                        "Repeat",
+                        "Say the {GameOrder} game again",
+                        "Say the {GameOrder} one again",
+                        "Repeat the {GameOrder} game again",
+                        "Repeat the {GameOrder} one again",
+                        "Repeat the names.",
+                        "Repeat the games.",
+                        "What was the {GameOrder} one again",
+                        "Say the {GameOrder} one again.",
+                        "Say the {GameOrder} game again.",
+                        "What was the {GameOrder} game again.",
+                        "Say the games again."
+                    ]
                 }
             ],
             "types": []
