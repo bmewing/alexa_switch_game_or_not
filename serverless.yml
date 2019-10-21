@@ -1,0 +1,45 @@
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
+
+service: sgon
+# app and org for use with dashboard.serverless.com
+app: switch-game-or-not
+org: bmewing
+
+provider:
+  name: aws
+  runtime: python3.7
+  stage: dev
+  versionFunctions: false
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:CreateTable"
+        - "dynamodb:GetItem"
+        - "dynamodb:PutItem"
+      Resource: "arn:aws:dynamodb:us-east-1:243701628035:table/Switch-Game-or-Not"
+
+# you can add packaging information here
+package:
+  include:
+    - real_games.txt
+    - fake_games.txt
+
+functions:
+  alexa:
+    handler: lambda_function.lambda_handler
+    events:
+      - alexaSkill: amzn1.ask.skill.c1b068e1-a5cd-4abd-b982-9f7510abe3ac
+
+plugins:
+  - serverless-python-requirements
