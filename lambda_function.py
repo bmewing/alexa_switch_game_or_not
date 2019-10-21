@@ -62,7 +62,7 @@ def help_intent_handler(handler_input):
         "2 if you think the second game is fake, "
         "3 if you think they're both fake or "
         "4 if you think neither is fake. "
-        "Are you ready to play now?
+        "Are you ready to play now?"
     )
     reprompt = "You'll need to pick a response, 1, 2, 3 or 4."
 

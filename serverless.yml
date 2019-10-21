@@ -27,7 +27,7 @@ provider:
         - "dynamodb:CreateTable"
         - "dynamodb:GetItem"
         - "dynamodb:PutItem"
-      Resource: "arn:aws:dynamodb:us-east-1:243701628035:table/Switch-Game-or-Not"
+      Resource: "arn:aws:dynamodb:us-east-1:*:table/Switch-Game-or-Not"
 
 # you can add packaging information here
 package:
