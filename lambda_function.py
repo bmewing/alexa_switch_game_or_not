@@ -55,14 +55,16 @@ def help_intent_handler(handler_input):
     """Handler for Help Intent."""
     # type: (HandlerInput) -> Response
     speech_text = (
-        "I've given you two names which may or may not be real games released "
+        "Here's how to play. "
+        "I'll give you two names which may or may not be real games released "
         "for the Nintendo Switch. "
         "Say 1 if you think the first game is fake, "
         "2 if you think the second game is fake, "
         "3 if you think they're both fake or "
-        "4 if you think neither is fake."
+        "4 if you think neither is fake. "
+        "Are you ready to play now?
     )
-    reprompt = "Pick a response, 1, 2, 3 or 4."
+    reprompt = "You'll need to pick a response, 1, 2, 3 or 4."
 
     handler_input.response_builder.speak(speech_text).ask(reprompt)
     return handler_input.response_builder.response
@@ -75,7 +77,7 @@ def help_intent_handler(handler_input):
 def cancel_and_stop_intent_handler(handler_input):
     """Single handler for Cancel and Stop Intent."""
     # type: (HandlerInput) -> Response
-    speech_text = "Thanks for playing! Check us out online at Switch Game or Not dot Com!"
+    speech_text = "Thanks for playing!"
 
     handler_input.response_builder.speak(
         speech_text).set_should_end_session(True)
